@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .models import Project, Pledge
 from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer
 
+
 class ProjectList(APIView):
     def get(self, request):
         projects = Project.objects.all()
@@ -14,7 +15,7 @@ class ProjectList(APIView):
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED
