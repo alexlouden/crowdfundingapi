@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+class PetTag(models.Model):
+    petspecies = models.CharField(max_length=200)
+
 class Project(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -13,7 +16,11 @@ class Project(models.Model):
         on_delete=models.CASCADE,
         related_name='owner_projects'
     )
-    
+    species = models.ManyToManyField(
+        PetTag,
+        related_name = "pets",
+        related_query_name = "pet"
+    )
 
 class Pledge(models.Model):
     amount = models.IntegerField()
@@ -29,3 +36,4 @@ class Pledge(models.Model):
         on_delete=models.CASCADE,
         related_name='supporter_pledges'
     )
+

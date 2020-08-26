@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Pledge
+from .models import Project, Pledge, PetTag
 
 class PledgeSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
@@ -20,9 +20,14 @@ class ProjectSerializer(serializers.Serializer):
     is_open = serializers.BooleanField()
     date_created = serializers.DateTimeField()
     owner = serializers.ReadOnlyField(source='owner.username')
+    species = serializers.SlugRelatedField(many=True, slug_field="petspecies", queryset=PetTag.objects.all())
 
     def create(self, validated_data):
-        return Project.objects.create(**validated_data)
+        species = validated_data.pop('species')
+        print(species)
+        project = Project.objects.create(**validated_data)
+        project.species.set(species)
+        return project
 
 class ProjectDetailSerializer(ProjectSerializer):
     pledges = PledgeSerializer(many=True, read_only=True)
@@ -38,3 +43,9 @@ class ProjectDetailSerializer(ProjectSerializer):
         instance.save()
         return instance
 
+class PetsSerializer(serializers.Serializer):
+    id = serializers.ReadOnlyField()
+    petspecies = serializers.CharField(max_length=200)
+
+    def create(self, validated_data):
+        return PetTag.objects.create(**validated_data)

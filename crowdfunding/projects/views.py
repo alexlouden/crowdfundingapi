@@ -2,8 +2,8 @@ from django.http import Http404
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Project, Pledge
-from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer
+from .models import Project, Pledge, PetTag
+from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer
 from .permissions import IsOwnerOrReadOnly
 
 class ProjectList(APIView):
@@ -91,3 +91,22 @@ class PledgeList(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
+class PetCategory(APIView):
+    def post(self, request):
+        serializer = PetsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    def get(self, request):
+        pets = PetTag.objects.all()
+        serializer = PetsSerializer(pets, many=True)
+        return Response(serializer.data)
