@@ -1,28 +1,37 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class CustomUser(AbstractUser):
-    is_supporter = models.BooleanField('supporter status', default='False')
-    is_owner = models.BooleanField('owner status', default='False')
 
     def __str__(self):
         return self.username
 
-class SupporterProfile(models.Model):
-    user = models.OneToOneField(
-        CustomUser, 
-        on_delete=models.CASCADE, 
-        primary_key=True,
-        related_name='supporter'
-    )
-    bio = models.TextField()
+    def is_supporter(self):
+        """ is the user a supporter """
+        return self.supporter_pledges.filter(anonymous=False).count() > 0
+    is_supporter.boolean = True
 
-class OwnerProfile(models.Model):
+    def is_owner(self):
+        """ is the user an owner """
+        return self.shelters.all().count() > 0
+    is_owner.boolean = True
+
+
+class Profile(models.Model):
     user = models.OneToOneField(
-    CustomUser, 
-    on_delete=models.CASCADE, 
-    primary_key=True,
-    related_name='owner'
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name = 'profile'
     )
-    shelterid = models.TextField()
+    bio = models.TextField(blank=True)
+
+@receiver(post_save, sender=CustomUser)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=CustomUser)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()

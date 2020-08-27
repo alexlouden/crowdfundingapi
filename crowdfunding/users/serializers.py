@@ -1,48 +1,32 @@
 from rest_framework import serializers
-from .models import CustomUser, SupporterProfile, OwnerProfile
+from .models import CustomUser, Profile
 
-class SupporterSerializer(serializers.Serializer):
+
+class UserSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     username = serializers.CharField(max_length=200)
     email = serializers.CharField(max_length=200)
-    bio = serializers.CharField(max_length=200, source='supporter.bio')
+    bio = serializers.CharField(max_length=200, source='profile.bio')
+    is_supporter = serializers.BooleanField(read_only=True)
+    is_owner = serializers.BooleanField(read_only=True)
 
     def create(self, validated_data):
         print(validated_data)
-        supporter_data = validated_data.pop('supporter')
-        newuser = CustomUser.objects.create(**validated_data)
-        newsupporter = SupporterProfile.objects.create(user=newuser, **supporter_data)
-        return newuser
+        profile_data = validated_data.pop('profile')
+        new_user = CustomUser.objects.create(**validated_data)
+        # update user profile data
+        Profile.objects.filter(user=new_user).update(**profile_data)
+        # refresh the user
+        new_user.refresh_from_db()
+        return new_user
 
     def update(self, user, validated_data):
         print(user)
         print(validated_data)
         user.username = validated_data.get('username', user.username)
         user.email = validated_data.get('email', user.email)
+        profile_data = validated_data.get('profile')
+        if profile_data:
+            user.profile.bio = profile_data.get('bio', user.profile.bio)
         user.save()
-        print(user)
-        print(user.supporter)
-        user.supporter.bio = validated_data.get('bio', user.supporter.bio)
-        user.supporter.save()
-        return user
-
-class OwnerSerializer(serializers.Serializer):
-    id = serializers.ReadOnlyField()
-    username = serializers.CharField(max_length=200)
-    email = serializers.CharField(max_length=200)
-    shelterid = serializers.CharField(max_length=200, source='owner.shelterid')
-
-    def create(self, validated_data):
-        print(validated_data)
-        owner_data = validated_data.pop('owner')
-        newuser = CustomUser.objects.create(**validated_data)
-        newowner = OwnerProfile.objects.create(user=newuser, **owner_data)
-        return newuser
-
-    def update(self, user, validated_data):
-        user.username = validated_data.get('username', user.username)
-        user.email = validated_data.get('email', user.email)
-        user.save()
-        user.owner.shelterid = validated_data.get('shelterid', user.owner.bio)
-        user.owner.save()
         return user

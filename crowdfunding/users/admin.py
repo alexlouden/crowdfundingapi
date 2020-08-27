@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import CustomUser, SupporterProfile, OwnerProfile
+from .models import CustomUser, Profile
 
 admin.site.register(CustomUser)
-admin.site.register(SupporterProfile)
-admin.site.register(OwnerProfile)
+admin.site.register(Profile)
+
