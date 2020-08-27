@@ -15,6 +15,7 @@ class SupporterUserList(APIView):
 
     def post(self, request):
         serializer = SupporterSerializer(data=request.data)
+        print(request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -38,8 +39,9 @@ class SupporterUserDetail(APIView):
 
     def put(self, request, pk):
         user = self.get_object(pk)
-        print("qqqq: ", user)
-        print(request.data)
+        # self.check_object_permissions(request, user)
+        # print("qqqq: ", user)
+        # print(request.data)
         data = request.data
         serializer = SupporterSerializer(
             instance=user,
