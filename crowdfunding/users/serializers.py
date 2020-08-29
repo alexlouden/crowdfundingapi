@@ -1,21 +1,32 @@
 from rest_framework import serializers
 from .models import CustomUser, Profile
 
+from projects.models import PetTag
+
 
 class UserSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     username = serializers.CharField(max_length=200)
     email = serializers.CharField(max_length=200)
     bio = serializers.CharField(max_length=200, source='profile.bio')
+    petlikes = serializers.SlugRelatedField(many=True, slug_field="petspecies", queryset=PetTag.objects.all(), source='profile.petlikes')
     is_supporter = serializers.BooleanField(read_only=True)
     is_owner = serializers.BooleanField(read_only=True)
 
     def create(self, validated_data):
         print(validated_data)
         profile_data = validated_data.pop('profile')
+        pet_likes = profile_data.pop('petlikes')
         new_user = CustomUser.objects.create(**validated_data)
         # update user profile data
         Profile.objects.filter(user=new_user).update(**profile_data)
+
+        # Get Users Profile record
+        profile = Profile.objects.get(user=new_user)
+
+        # Add pet likes to the profile
+        profile.petlikes.add(*pet_likes)
+
         # refresh the user
         new_user.refresh_from_db()
         return new_user
@@ -28,5 +39,6 @@ class UserSerializer(serializers.Serializer):
         profile_data = validated_data.get('profile')
         if profile_data:
             user.profile.bio = profile_data.get('bio', user.profile.bio)
+            user.profile.petlikes = profile_data.get('petlikes', user.profile.petlikes)
         user.save()
         return user

@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 class CustomUser(AbstractUser):
 
     def __str__(self):
@@ -26,6 +27,11 @@ class Profile(models.Model):
         related_name = 'profile'
     )
     bio = models.TextField(blank=True)
+    petlikes = models.ManyToManyField(
+        "projects.PetTag",
+        related_name = "liked_by",
+        related_query_name = "pet"
+    )
 
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):

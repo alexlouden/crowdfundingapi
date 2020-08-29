@@ -1,10 +1,11 @@
 from django.http import Http404
-from rest_framework import status, permissions
+from rest_framework import status, permissions, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Project, Pledge, PetTag
 from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer
 from .permissions import IsOwnerOrReadOnly
+from users.models import CustomUser
 
 class ProjectList(APIView):
     #this permission allows users logged in to create projects and 
@@ -28,6 +29,21 @@ class ProjectList(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
+class SheltersProjects(generics.ListAPIView):
+    serializer_class = ProjectSerializer
+
+    def get_queryset(self):
+        shelter = self.kwargs['slug']
+        return Project.objects.filter(owner__username=shelter)
+
+class RecommendedProjects(generics.ListAPIView):
+    serializer_class = ProjectSerializer
+
+    def get_queryset(self):
+        username = self.kwargs['slug']
+        return Project.objects.filter(species__liked_by=username)
+
 
 class ProjectDetail(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,

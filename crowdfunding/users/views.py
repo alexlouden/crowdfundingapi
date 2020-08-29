@@ -41,9 +41,6 @@ class UserDetail(APIView):
 
     def put(self, request, pk):
         user = self.get_object(pk)
-        # self.check_object_permissions(request, user)
-        # print("qqqq: ", user)
-        # print(request.data)
         data = request.data
         serializer = UserSerializer(
             instance=user,

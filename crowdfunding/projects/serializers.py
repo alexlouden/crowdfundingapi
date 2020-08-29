@@ -24,7 +24,6 @@ class ProjectSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         species = validated_data.pop('species')
-        print(species)
         project = Project.objects.create(**validated_data)
         project.species.set(species)
         return project

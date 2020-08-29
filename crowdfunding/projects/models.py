@@ -5,6 +5,8 @@ from django.db import models
 class Shelter(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
+    address = models.CharField(max_length=200)
+    charityregister = models.IntegerField()
     owner = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
