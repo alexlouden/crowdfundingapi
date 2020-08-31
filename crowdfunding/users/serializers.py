@@ -39,6 +39,6 @@ class UserSerializer(serializers.Serializer):
         profile_data = validated_data.get('profile')
         if profile_data:
             user.profile.bio = profile_data.get('bio', user.profile.bio)
-            user.profile.petlikes = profile_data.get('petlikes', user.profile.petlikes)
+            user.profile.petlikes.set(profile_data.get('petlikes', user.profile.petlikes))
         user.save()
         return user

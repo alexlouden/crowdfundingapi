@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from .models import Project, Pledge, PetTag
 from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer
 from .permissions import IsOwnerOrReadOnly
+from users.models import CustomUser, Profile
+
 
 
 class ProjectList(APIView):
@@ -40,12 +42,11 @@ class SheltersProjects(generics.ListAPIView):
 
 class RecommendedProjects(generics.ListAPIView):
     serializer_class = ProjectSerializer
-
     def get_queryset(self):
         username = self.kwargs['slug']
-        user_likes = 
-        return Project.objects.filter(species__liked_by=username)
-
+        user = CustomUser.objects.get(username=username)
+        liked_list = user.profile.petlikes.all()
+        return Project.objects.filter(species__in=liked_list)
 
 class ProjectDetail(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
