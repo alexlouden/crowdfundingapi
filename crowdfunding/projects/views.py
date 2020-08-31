@@ -1,11 +1,12 @@
 from django.http import Http404
+from django.contrib.auth import get_user_model
 from rest_framework import status, permissions, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Project, Pledge, PetTag
 from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer
 from .permissions import IsOwnerOrReadOnly
-from users.models import CustomUser
+
 
 class ProjectList(APIView):
     #this permission allows users logged in to create projects and 
@@ -35,13 +36,14 @@ class SheltersProjects(generics.ListAPIView):
 
     def get_queryset(self):
         shelter = self.kwargs['slug']
-        return Project.objects.filter(owner__username=shelter)
+        return Project.objects.filter(shelter__name=shelter)
 
 class RecommendedProjects(generics.ListAPIView):
     serializer_class = ProjectSerializer
 
     def get_queryset(self):
         username = self.kwargs['slug']
+        user_likes = 
         return Project.objects.filter(species__liked_by=username)
 
 
