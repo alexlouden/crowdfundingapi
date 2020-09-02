@@ -3,12 +3,30 @@ from django.contrib.auth import get_user_model
 from rest_framework import status, permissions, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Project, Pledge, PetTag
-from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer
+from .models import Project, Pledge, PetTag, Shelter
+from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer, ShelterSerializer
 from .permissions import IsOwnerOrReadOnly
 from users.models import CustomUser, Profile
 
+class ShelterList(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    def get(self, request):
+        shelters = Shelter.objects.all()
+        serializer = ShelterSerializer(shelters, many=True)
+        return Response(serializer.data)
 
+    def post(self, request):
+        serializer = ShelterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 class ProjectList(APIView):
     #this permission allows users logged in to create projects and 

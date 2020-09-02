@@ -36,7 +36,11 @@ class Project(models.Model):
         related_name = "pets",
         related_query_name = "pet"
     )
-    shelter = models.ForeignKey(Shelter, on_delete=models.CASCADE, related_name='projects', null=True)
+    shelter = models.ForeignKey(
+        Shelter, 
+        on_delete=models.CASCADE, 
+        related_name='projects', 
+        null=True)
 
 class Pledge(models.Model):
     amount = models.IntegerField()
