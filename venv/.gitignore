@@ -1,9 +1,5 @@
 # created by virtualenv automatically
-/venv/*
-/.venv
+venv/*
 __pycache__/
 *.sqlite3
 *.vscode
-/.idea
-*.pyc
-staticfiles
