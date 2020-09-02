@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'projects.apps.ProjectsConfig',
     'rest_framework.authtoken',
     'rest_framework',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -66,6 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middlewear.CorsMiddlewear',
 ]
 
 ROOT_URLCONF = 'crowdfunding.urls'
