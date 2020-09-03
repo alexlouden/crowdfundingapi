@@ -16,11 +16,8 @@ class CustomUser(AbstractUser):
 
     def is_owner(self):
         """ is the user an owner """
-        return self.shelters.all().count() > 0
+        return hasattr(self, 'shelter')
     is_owner.boolean = True
-
-    def get_shelter(self):
-        return self.shelters.all()
 
 
 class Profile(models.Model):
