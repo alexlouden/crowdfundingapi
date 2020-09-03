@@ -11,6 +11,18 @@ class ShelterSerializer(serializers.Serializer):
     def create(self, validated_data):
         return Shelter.objects.create(**validated_data)
 
+class ShelterDetailSerializer(ShelterSerializer):
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.address = validated_data.get('address', instance.address)
+        instance.charityregister = validated_data.get('charityregister', instance.name)
+        instance.owner = validated_data.get('owner', instance.owner)
+        instance.save()
+        return instance
+
+
 class PledgeSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     amount = serializers.IntegerField()
@@ -20,6 +32,7 @@ class PledgeSerializer(serializers.Serializer):
     project_id = serializers.IntegerField()
     def create(self, validated_data):
         return Pledge.objects.create(**validated_data)
+
 
 class ProjectSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
@@ -44,7 +57,6 @@ class ProjectSerializer(serializers.Serializer):
 class ProjectDetailSerializer(ProjectSerializer):
     pledges = PledgeSerializer(many=True, read_only=True)
 
-
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
@@ -56,6 +68,7 @@ class ProjectDetailSerializer(ProjectSerializer):
         instance.species.set(validated_data.get('species', instance.species))
         instance.save()
         return instance
+
 
 class PetsSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()

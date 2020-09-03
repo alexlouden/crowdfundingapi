@@ -5,11 +5,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ParseError
 from .models import Project, Pledge, PetTag, Shelter
-from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer, ShelterSerializer
-from .permissions import IsOwnerOrReadOnly
+from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer, ShelterSerializer, ShelterDetailSerializer
+from .permissions import IsOwnerOrReadOnly, IsGetOrIsAdmin
 from users.models import CustomUser, Profile
 
+
+# Shelters
+
 class ShelterList(APIView):
+    # Create a new shelter, get list of shelters
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     def get(self, request):
         shelters = Shelter.objects.all()
@@ -29,7 +33,48 @@ class ShelterList(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+class ShelterDetail(APIView):
+    # Get details of a single shelter, update shelter details
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly
+    ]
+
+    def get_object(self, pk):
+        try:
+            return Shelter.objects.get(pk=pk)
+        except Shelter.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        shelter = self.get_object(pk)
+        serializer = ShelterDetailSerializer(shelter)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        shelter = self.get_object(pk)
+        data = request.data
+        serializer = ShelterDetailSerializer(
+            instance=shelter,
+            data=data,
+            partial=True
+            )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+# Projects
+
 class ProjectList(APIView):
+    # Create a new project, get list of projects
+
     #this permission allows users logged in to create projects and 
     # non logged in users to read project
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -55,25 +100,8 @@ class ProjectList(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-class SheltersProjects(generics.ListAPIView):
-    serializer_class = ProjectSerializer
-
-    def get_queryset(self):
-        sheltername = self.kwargs['slug']
-        shelter = Shelter.objects.get(name=sheltername)
-        user = shelter.owner
-        # breakpoint()
-        return Project.objects.filter(owner=user)
-
-class RecommendedProjects(generics.ListAPIView):
-    serializer_class = ProjectSerializer
-    def get_queryset(self):
-        username = self.kwargs['slug']
-        user = CustomUser.objects.get(username=username)
-        liked_list = user.profile.petlikes.all()
-        return Project.objects.filter(species__in=liked_list)
-
 class ProjectDetail(APIView):
+    # See details of single project, update project
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
     IsOwnerOrReadOnly
     ]
@@ -115,7 +143,38 @@ class ProjectDetail(APIView):
             status = status.HTTP_204_NO_CONTENT
         )
 
+
+
+# Filtered project lists
+
+class SheltersProjects(generics.ListAPIView):
+    # Get list of all projects associated with shelter in URL
+    serializer_class = ProjectSerializer
+
+    def get_queryset(self):
+        sheltername = self.kwargs['slug']
+        shelter = Shelter.objects.get(name=sheltername)
+        user = shelter.owner
+        # breakpoint()
+        return Project.objects.filter(owner=user)
+
+class RecommendedProjects(generics.ListAPIView):
+    # Get list of projects for pets that the current user likes
+    serializer_class = ProjectSerializer
+
+    def get_queryset(self):
+        username = self.kwargs['slug']
+        user = CustomUser.objects.get(username=username)
+        liked_list = user.profile.petlikes.all()
+        return Project.objects.filter(species__in=liked_list)
+
+
+
+# Pledges
+
 class PledgeList(APIView):
+    # Create a pledge, return list of pledges
+
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
@@ -136,7 +195,18 @@ class PledgeList(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+
+
+# Pet Categories
+
 class PetCategory(APIView):
+    # Create pet category, return list of all categories
+    permission_classes = [IsGetOrIsAdmin]
+
+    # permission_classes_by_action = {
+    #     'create': [permissions.IsAdminUser],
+    #     'list': [permissions.AllowAny]
+    # }
     def post(self, request):
         serializer = PetsSerializer(data=request.data)
         if serializer.is_valid():
