@@ -8,13 +8,13 @@ class Shelter(models.Model):
     description = models.TextField()
     address = models.CharField(max_length=200)
     charityregister = models.IntegerField()
+    is_approved = models.BooleanField(default=False)
     owner = models.OneToOneField(
         get_user_model(),
         on_delete=models.CASCADE,
         related_name='shelter'
     )
-    is_approved = models.BooleanField(default=False)
-
+    
     def __str__(self):
         return self.name
 

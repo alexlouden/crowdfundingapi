@@ -31,6 +31,7 @@ class ProjectSerializer(serializers.Serializer):
     date_created = serializers.DateTimeField()
     owner = serializers.ReadOnlyField(source='owner.username')
     shelter = serializers.ReadOnlyField(source='owner.shelter.name')
+    is_approved = serializers.ReadOnlyField(source='owner.shelter.is_approved')
     species = serializers.SlugRelatedField(many=True, slug_field="petspecies", queryset=PetTag.objects.all())
 
     def create(self, validated_data):

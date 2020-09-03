@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status, permissions, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import ParseError
 from .models import Project, Pledge, PetTag, Shelter
 from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer, ShelterSerializer
 from .permissions import IsOwnerOrReadOnly
@@ -41,9 +42,9 @@ class ProjectList(APIView):
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
-            # if not shelter.is_approved:
-            #     raise ParseError('Shelter is not approved, can not create projects')
-            # project.shelter = Shelter.name.filter(owner=request.user)
+            project = serializer.instance
+            if not request.user.shelter.is_approved:
+                raise ParseError('Shelter is not approved, can not create projects')
             serializer.save(owner=request.user)
             return Response(
                 serializer.data,
