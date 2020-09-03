@@ -33,9 +33,13 @@ class ProjectSerializer(serializers.Serializer):
     species = serializers.SlugRelatedField(many=True, slug_field="petspecies", queryset=PetTag.objects.all())
 
     def create(self, validated_data):
+        # Ignore this - also stuck on getting the shelter name to associate with projects
+        # shelter = Shelter.objects.filter(owner=self.request.user)
+        breakpoint()
         species = validated_data.pop('species')
         project = Project.objects.create(**validated_data)
         project.species.set(species)
+        project.save()
         return project
 
 class ProjectDetailSerializer(ProjectSerializer):
