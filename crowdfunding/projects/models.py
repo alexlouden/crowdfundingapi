@@ -7,10 +7,11 @@ class Shelter(models.Model):
     description = models.TextField()
     address = models.CharField(max_length=200)
     charityregister = models.IntegerField()
-    owner = models.ForeignKey(
+    is_approved = models.BooleanField(default=False)
+    owner = models.OneToOneField(
         get_user_model(),
         on_delete=models.CASCADE,
-        related_name='shelters'
+        related_name='shelter'
     )
 
     def __str__(self):
@@ -18,6 +19,9 @@ class Shelter(models.Model):
 
 class PetTag(models.Model):
     petspecies = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.petspecies
 
 class Project(models.Model):
     title = models.CharField(max_length=200)
@@ -33,14 +37,9 @@ class Project(models.Model):
     )
     species = models.ManyToManyField(
         PetTag,
-        related_name = "pets",
-        related_query_name = "pet"
+        related_name = "projects",
+        related_query_name = "projects"
     )
-    shelter = models.ForeignKey(
-        Shelter, 
-        on_delete=models.CASCADE, 
-        related_name='projects', 
-        null=True)
 
 class Pledge(models.Model):
     amount = models.IntegerField()

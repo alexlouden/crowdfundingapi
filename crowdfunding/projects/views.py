@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status, permissions, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import ParseError
 from .models import Project, Pledge, PetTag, Shelter
 from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, PetsSerializer, ShelterSerializer
 from .permissions import IsOwnerOrReadOnly
@@ -29,7 +30,7 @@ class ShelterList(APIView):
         )
 
 class ProjectList(APIView):
-    #this permission allows users logged in to create projects and 
+    #this permission allows users logged in to create projects and
     # non logged in users to read project
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -41,7 +42,9 @@ class ProjectList(APIView):
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(owner=request.user)
+            serializer.save(
+                owner=request.user,
+            )
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED
@@ -100,7 +103,7 @@ class ProjectDetail(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     def delete(self, request, pk):
         project = self.get_object(pk)
         project.delete()
@@ -142,7 +145,7 @@ class PetCategory(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     def get(self, request):
         pets = PetTag.objects.all()
         serializer = PetsSerializer(pets, many=True)

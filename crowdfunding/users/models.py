@@ -20,6 +20,7 @@ class CustomUser(AbstractUser):
     is_owner.boolean = True
 
 
+
 class Profile(models.Model):
     user = models.OneToOneField(
         CustomUser,
