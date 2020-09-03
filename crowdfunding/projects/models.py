@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+# from users.models import get_shelter
 
 
 class Shelter(models.Model):
@@ -13,6 +14,7 @@ class Shelter(models.Model):
         on_delete=models.CASCADE,
         related_name='shelter'
     )
+    is_approved = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -38,7 +40,7 @@ class Project(models.Model):
     species = models.ManyToManyField(
         PetTag,
         related_name = "projects",
-        related_query_name = "projects"
+        related_query_name = "project"
     )
 
 class Pledge(models.Model):

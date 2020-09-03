@@ -19,6 +19,9 @@ class CustomUser(AbstractUser):
         return self.shelters.all().count() > 0
     is_owner.boolean = True
 
+    def get_shelter(self):
+        return self.shelters.all()
+
 
 
 class Profile(models.Model):
