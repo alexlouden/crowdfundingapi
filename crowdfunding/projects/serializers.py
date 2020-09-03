@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Project, Pledge, PetTag, Shelter
 
+
 class ShelterSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=500)
@@ -29,13 +30,10 @@ class ProjectSerializer(serializers.Serializer):
     is_open = serializers.BooleanField()
     date_created = serializers.DateTimeField()
     owner = serializers.ReadOnlyField(source='owner.username')
-    shelter = serializers.ReadOnlyField(source='shelter.name')
+    shelter = serializers.ReadOnlyField(source='owner.shelter.name')
     species = serializers.SlugRelatedField(many=True, slug_field="petspecies", queryset=PetTag.objects.all())
 
     def create(self, validated_data):
-        # Ignore this - also stuck on getting the shelter name to associate with projects
-        # shelter = Shelter.objects.filter(owner=self.request.user)
-        breakpoint()
         species = validated_data.pop('species')
         project = Project.objects.create(**validated_data)
         project.species.set(species)

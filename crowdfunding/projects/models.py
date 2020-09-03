@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+# from users.models import get_shelter
 
 
 class Shelter(models.Model):
@@ -7,17 +8,21 @@ class Shelter(models.Model):
     description = models.TextField()
     address = models.CharField(max_length=200)
     charityregister = models.IntegerField()
-    owner = models.ForeignKey(
+    owner = models.OneToOneField(
         get_user_model(),
         on_delete=models.CASCADE,
-        related_name='shelters'
+        related_name='shelter'
     )
+    is_approved = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
 
 class PetTag(models.Model):
     petspecies = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.petspecies
 
 class Project(models.Model):
     title = models.CharField(max_length=200)
@@ -33,14 +38,9 @@ class Project(models.Model):
     )
     species = models.ManyToManyField(
         PetTag,
-        related_name = "pets",
-        related_query_name = "pet"
+        related_name = "projects",
+        related_query_name = "project"
     )
-    shelter = models.ForeignKey(
-        Shelter, 
-        on_delete=models.CASCADE, 
-        related_name='projects', 
-        null=True)
 
 class Pledge(models.Model):
     amount = models.IntegerField()

@@ -41,6 +41,9 @@ class ProjectList(APIView):
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
+            # if not shelter.is_approved:
+            #     raise ParseError('Shelter is not approved, can not create projects')
+            # project.shelter = Shelter.name.filter(owner=request.user)
             serializer.save(owner=request.user)
             return Response(
                 serializer.data,
