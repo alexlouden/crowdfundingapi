@@ -59,8 +59,11 @@ class SheltersProjects(generics.ListAPIView):
     serializer_class = ProjectSerializer
 
     def get_queryset(self):
-        shelter = self.kwargs['slug']
-        return Project.objects.filter(shelter__name=shelter)
+        sheltername = self.kwargs['slug']
+        shelter = Shelter.objects.get(name=sheltername)
+        user = shelter.owner
+        # breakpoint()
+        return Project.objects.filter(owner=user)
 
 class RecommendedProjects(generics.ListAPIView):
     serializer_class = ProjectSerializer
